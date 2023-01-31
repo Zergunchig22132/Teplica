@@ -1,0 +1,34 @@
+import requests
+
+# Я использую списки, длина которых больше на один элемент для удобства. Порядковый номер устройства является индексом его переменной в списке. 
+temperature = [0, 0, 0, 0, 0]
+air_wetness = [0, 0, 0, 0, 0]
+soil_wetness = [0, 0, 0, 0, 0, 0, 0]
+vents_open = False
+watering = [False, False, False, False, False, False, False]
+air_humidification = False
+
+def get_temperature(num):
+	json_temp = str(requests.get("https://dt.miet.ru/ppo_it/api/temp_hum/" + str(num)))
+	print(json_temp)
+	pass
+
+def get_air_wetness(num):
+	pass
+	
+def get_soil_wetness(num):
+	json_soil = str(requests.get("https://dt.miet.ru/ppo_it/api/hum/" + str(num)))
+	json_soil = json_soil[11:-2]
+	json_soil = float(json_soil)
+	soil_wetness[num] = json_soil
+	
+def set_vents(state):
+	pass
+	
+def set_watering(num, state):
+	pass
+	
+def set_fumigation(state):
+	pass
+	
+get_temperature(4)
