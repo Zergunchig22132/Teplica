@@ -1,34 +1,50 @@
 import requests
+import time
 
-# Я использую списки, длина которых больше на один элемент для удобства. Порядковый номер устройства является индексом его переменной в списке. 
+# Я использую списки, длина которых больше на один элемент для удобства.
+# Порядковый номер устройства является индексом его переменной в списке.
 temperature = [0, 0, 0, 0, 0]
 air_wetness = [0, 0, 0, 0, 0]
 soil_wetness = [0, 0, 0, 0, 0, 0, 0]
 vents_open = False
 watering = [False, False, False, False, False, False, False]
 air_humidification = False
+operational_list = []
 
-def get_temperature(num):
-	json_temp = str(requests.get("https://dt.miet.ru/ppo_it/api/temp_hum/" + str(num)))
-	print(json_temp)
-	pass
+
+def get_temperature():
+    for i in range(1, 5):
+        json_temp = str(requests.get("https://dt.miet.ru/ppo_it/api/temp_hum/{}".format(str(i))).json())
+        operational_list = json_temp.split()
+        temperature[i] = float(str(operational_list[3])[0:-1])
+        air_wetness[i] = float(str(operational_list[5])[0:-1])
+    pass
+
 
 def get_air_wetness(num):
-	pass
-	
+    pass
+
+
 def get_soil_wetness(num):
-	json_soil = str(requests.get("https://dt.miet.ru/ppo_it/api/hum/" + str(num)))
-	json_soil = json_soil[11:-2]
-	json_soil = float(json_soil)
-	soil_wetness[num] = json_soil
-	
+    json_soil = str(requests.get("https://dt.miet.ru/ppo_it/api/hum/" + str(num)))
+    json_soil = json_soil[11:-2]
+    json_soil = float(json_soil)
+    soil_wetness[num] = json_soil
+
+
 def set_vents(state):
-	pass
-	
+    pass
+
+
 def set_watering(num, state):
-	pass
-	
+    pass
+
+
 def set_fumigation(state):
-	pass
-	
-get_temperature(4)
+    pass
+
+
+while (True):
+    get_temperature()
+    print(temperature, air_wetness)
+    time.sleep(0.25)
