@@ -10,41 +10,50 @@ vents_open = False
 watering = [False, False, False, False, False, False, False]
 air_humidification = False
 operational_list = []
+token = ""
 
 
-def get_temperature():
+def get_air():
     for i in range(1, 5):
         json_temp = str(requests.get("https://dt.miet.ru/ppo_it/api/temp_hum/{}".format(str(i))).json())
         operational_list = json_temp.split()
         temperature[i] = float(str(operational_list[3])[0:-1])
         air_wetness[i] = float(str(operational_list[5])[0:-1])
-    pass
 
 
-def get_air_wetness(num):
-    pass
-
-
-def get_soil_wetness(num):
-    json_soil = str(requests.get("https://dt.miet.ru/ppo_it/api/hum/" + str(num)))
-    json_soil = json_soil[11:-2]
-    json_soil = float(json_soil)
-    soil_wetness[num] = json_soil
+def get_soil_wetness():
+    for i in range(1, 7):
+        json_soil = str(requests.get("https://dt.miet.ru/ppo_it/api/hum/{}".format(str(i))).json())
+        json_soil = json_soil.split()
+        soil_wetness[i] = float(str(json_soil[3])[0:-1])
 
 
 def set_vents(state):
-    pass
+    if state:
+        requests.patch('https://dt.miet.ru/ppo_it/api/fork_drive/', data={'state': 1})
+        vents_open = True
+    else:
+        requests.patch('https://dt.miet.ru/ppo_it/api/fork_drive/', data={'state': 0})
+        vents_open = False
 
 
 def set_watering(num, state):
-    pass
+    if state:
+        requests.patch('https://dt.miet.ru/ppo_it/api/watering', data=dict(id=num, state=1))
+    else:
+        requests.patch('https://dt.miet.ru/ppo_it/api/watering', data=dict(id=num, state=2))
 
 
 def set_fumigation(state):
-    pass
+    if state:
+        requests.patch("https://dt.miet.ru/ppo_it/api/total_hum", data=dict(state=1))
+        air_humidification = True
+    else:
+        requests.patch("https://dt.miet.ru/ppo_it/api/total_hum", data=dict(state=0))
+        air_humidification = False
 
 
-while (True):
-    get_temperature()
-    print(temperature, air_wetness)
-    time.sleep(0.25)
+while True:
+    get_air()
+    get_soil_wetness()
+    time.sleep(2)
