@@ -6,7 +6,7 @@ Config.set('graphics', 'window_state', 'maximized')
 from kivy.app import App
 from kivy.uix.label import Label
 from kivy.uix.button import Button
-from kivy.uix.float.layout import FloatLayout
+from kivy.uix.floatlayout import FloatLayout
 import time
 import random
 import requests
