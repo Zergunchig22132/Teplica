@@ -29,6 +29,7 @@ soil_wetness = [0, 0, 0, 0, 0, 0, 0]
 vents_open = False
 watering = [False, False, False, False, False, False, False]
 air_humidification = False
+manual_mode = False
 operational_list = []
 token = ""
 
@@ -57,11 +58,13 @@ def change_vents():
         vents_open = True
 
 
-def set_watering(num, state):
-    if state:
-        requests.patch('https://dt.miet.ru/ppo_it/api/watering', data=dict(id=num, state=1))
+def change_watering(num):
+    if watering[num]:
+        requests.patch('https://dt.miet.ru/ppo_it/api/watering', data=dict(id=num, state=0))
+		watering[num] = False
     else:
-        requests.patch('https://dt.miet.ru/ppo_it/api/watering', data=dict(id=num, state=2))
+        requests.patch('https://dt.miet.ru/ppo_it/api/watering', data=dict(id=num, state=1))
+		watering[num] = True
 
 
 def change_air_humidification():
@@ -71,12 +74,25 @@ def change_air_humidification():
     else:
         requests.patch("https://dt.miet.ru/ppo_it/api/total_hum", data=dict(state=1))
         air_humidification = True
+		
+def change_manual_mode():
+	if manual_mode:
+		manual_mode = False
+	else:
+		manual_mode = True
 
 class MaketApp(App):
   def build(self):
     layout = BoxLayout(size = (1080, 1920))
     vents_button = Button(text = 'Переключить форточки', font_size = 14, on_press= change_vents())
     air_humidification_button = Button(text = 'Переключить увлажнители', font_size = 14, on_press = change_air_humidification())
+	watering_button_1 = Button(text = 'Полив 1', font_size = 14, on_press = change_watering(1))
+	watering_button_2 = Button(text = 'Полив 1', font_size = 14, on_press = change_watering(2))
+	watering_button_3 = Button(text = 'Полив 1', font_size = 14, on_press = change_watering(3))
+	watering_button_4 = Button(text = 'Полив 1', font_size = 14, on_press = change_watering(4))
+	watering_button_5 = Button(text = 'Полив 1', font_size = 14, on_press = change_watering(5))
+	watering_button_6 = Button(text = 'Полив 1', font_size = 14, on_press = change_watering(6))
+	manual_mode_button = Button(text = 'Ручное управление', font_size = 14, on_press = change_manual_mode())
     
 if __name__ == '__main__':
 	MaketApp().run()
