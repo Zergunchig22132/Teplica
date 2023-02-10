@@ -16,3 +16,4 @@ from kivy.uix.spinner import Spinner
 from kivy.uix.switch import Switch
 from kivy.properties import NumericProperty, StringProperty, ListProperty, DictProperty, ObjectProperty, BooleanProperty, BoundedNumericProperty, OptionProperty
 from kivy.uix.pagelayout import PageLayout
+from threading import Timer
