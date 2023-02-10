@@ -75,8 +75,8 @@ def change_air_humidification():
 class MaketApp(App):
   def build(self):
     layout = BoxLayout(size = (1080, 1920))
-    vents_button = Button(text = 'Переключить форточки', font_size = 14, on_press(change_vents))
-    air_humidification_button = Button(text = 'Переключить увлажнители', font_size = 14, on_press(change_air_humidification))
+    vents_button = Button(text = 'Переключить форточки', font_size = 14, on_press= change_vents())
+    air_humidification_button = Button(text = 'Переключить увлажнители', font_size = 14, on_press = change_air_humidification())
     
 if __name__ == '__main__':
 	MaketApp().run()
