@@ -17,3 +17,10 @@ from kivy.uix.switch import Switch
 from kivy.properties import NumericProperty, StringProperty, ListProperty, DictProperty, ObjectProperty, BooleanProperty, BoundedNumericProperty, OptionProperty
 from kivy.uix.pagelayout import PageLayout
 from threading import Timer
+
+
+class MaketApp(App):
+  def build(self):
+    layout = BoxLayout(size = (1080, 1920))
+    vents_button = Button(text = 'Переключить форточки', font_size = 14, on_press(change_vents))
+    air_fumigation_button = Button(text = 'Переключить увлажнители', font_size = 14, on_press(change_air_fumigation))
