@@ -1,15 +1,28 @@
+import requests
+import time
 from kivy.config import Config
 
-Config.set('graphics', 'fullscreen', 'auto')
-Config.set('graphics', 'window_state', 'maximized')
+#Config.set('graphics', 'fullscreen', 'auto')
+#Config.set('graphics', 'window_state', 'maximized')
 
-from kivy.app import App
-from kivy.uix.label import Label
-from kivy.uix.button import Button
+Config.set('graphics', 'width', '360')
+Config.set('graphics', 'height', '640')
+
 from kivy.uix.floatlayout import FloatLayout
-import time
-import random
-import requests
+from kivy.app import App
+from kivy.uix.button import Button
+from kivy.uix.label import Label
+from kivy.uix.carousel import Carousel
+from kivy.uix.colorpicker import ColorPicker
+from kivy.uix.image import Image
+from kivy.uix.textinput import TextInput
+from kivy.uix.modalview import ModalView
+from kivy.uix.spinner import Spinner
+from kivy.uix.switch import Switch
+from kivy.properties import NumericProperty, StringProperty, ListProperty, DictProperty, ObjectProperty, \
+    BooleanProperty, BoundedNumericProperty, OptionProperty
+from kivy.uix.pagelayout import PageLayout
+from threading import Timer
 
 # Я использую списки, длина которых больше на один элемент для удобства.
 # Порядковый номер устройства является индексом его переменной в списке.
@@ -19,8 +32,11 @@ soil_wetness = [0, 0, 0, 0, 0, 0, 0]
 vents_open = False
 watering = [False, False, False, False, False, False, False]
 air_humidification = False
+manual_mode = False
 operational_list = []
 token = ""
+font = 14
+
 
 def get_air():
     for i in range(1, 5):
@@ -37,48 +53,102 @@ def get_soil_wetness():
         soil_wetness[i] = float(str(json_soil[3])[0:-1])
 
 
-def set_vents(state):
-    if state:
-        requests.patch('https://dt.miet.ru/ppo_it/api/fork_drive/', data={'state': 1})
-        vents_open = True
-    else:
+def change_vents():
+    global vents_open
+    if vents_open:
         requests.patch('https://dt.miet.ru/ppo_it/api/fork_drive/', data={'state': 0})
         vents_open = False
+    else:
+        requests.patch('https://dt.miet.ru/ppo_it/api/fork_drive/', data={'state': 1})
+        vents_open = True
 
 
-def set_watering(num, state):
-    if state:
+def change_watering(num):
+    if watering[num]:
+        requests.patch('https://dt.miet.ru/ppo_it/api/watering', data=dict(id=num, state=0))
+        watering[num] = False
+    else:
         requests.patch('https://dt.miet.ru/ppo_it/api/watering', data=dict(id=num, state=1))
-    else:
-        requests.patch('https://dt.miet.ru/ppo_it/api/watering', data=dict(id=num, state=2))
+        watering[num] = True
 
 
-def set_fumigation(state):
-    if state:
-        requests.patch("https://dt.miet.ru/ppo_it/api/total_hum", data=dict(state=1))
-        air_humidification = True
-    else:
+def change_air_humidification():
+    global air_humidification
+    if air_humidification:
         requests.patch("https://dt.miet.ru/ppo_it/api/total_hum", data=dict(state=0))
         air_humidification = False
+    else:
+        requests.patch("https://dt.miet.ru/ppo_it/api/total_hum", data=dict(state=1))
+        air_humidification = True
 
-def initialization():
-  get_air()
-  get_soil_wetness()
-  set_vents(False)
-  for k1 in range(1, 7):
-    set_watering(k1, False)
-  set_fumigation(False) # остановился тут 
-  
-class MainApp(App):
-  def build(self):
-    initialization()
-    layout = FloatLayout(size='auto') # Возможно, нужно сменить на цифры
-    
-    
-    
-    return layout
-  
-if __name__ == '__main__': 
-  app = MainApp()
-  app.run()
 
+def change_manual_mode():
+    global manual_mode
+    if manual_mode:
+        manual_mode = False
+    else:
+        manual_mode = True
+
+
+class MaketApp(App):
+    def build(self):
+        layout = FloatLayout(size=(500, 500))
+        global font
+
+        vents_button = Button(text='Переключить\nфорточки',
+                              font_size=font,
+                              size_hint=(0.15, 0.1),
+                              pos_hint={'center_x': 0.09, 'center_y': 0.06})
+        vents_button.bind(on_press=self.change_vents)
+
+        air_humidification_button = Button(text='Переключить\nувлажнители',
+                                           font_size=font,
+                                           size_hint=(0.15, 0.1),
+                                           pos_hint={'center_x': 0.2, 'center_y': 0.13})
+        air_humidification_button.bind(on_press=self.change_humidification)
+
+        watering_button_1 = Button(text='Полив 1',
+                                   font_size=font,
+                                   size_hint=(0.1, 0.06),
+                                   pos_hint={'center_x': 0.3, 'center_y': 0.13})
+
+        layout.add_widget(vents_button)
+        layout.add_widget(air_humidification_button)
+        layout.add_widget(watering_button_1)
+        return layout
+
+    def change_vents(self, instance):
+        global vents_open
+        if vents_open:
+            requests.patch('https://dt.miet.ru/ppo_it/api/fork_drive/', data={'state': 0})
+            vents_open = False
+        else:
+            requests.patch('https://dt.miet.ru/ppo_it/api/fork_drive/', data={'state': 1})
+            vents_open = True
+
+    def change_humidification(self, instance):
+        global air_humidification
+        if air_humidification:
+            requests.patch("https://dt.miet.ru/ppo_it/api/total_hum", data=dict(state=0))
+            air_humidification = False
+        else:
+            requests.patch("https://dt.miet.ru/ppo_it/api/total_hum", data=dict(state=1))
+            air_humidification = True
+
+
+        # watering_button_2 = Button(text='Полив 2', font_size=14,
+        # on_press=change_watering(2)) watering_button_3 = Button(text='Полив 3', font_size=14,
+        # on_press=change_watering(3)) watering_button_4 = Button(text='Полив 4', font_size=14,
+        # on_press=change_watering(4)) watering_button_5 = Button(text='Полив 5', font_size=14,
+        # on_press=change_watering(5)) watering_button_6 = Button(text='Полив 6', font_size=14,
+        # on_press=change_watering(6)) manual_mode_button = Button(text='Ручное управление', font_size=14,
+        # on_press=change_manual_mode)
+
+
+if __name__ == '__main__':
+    MaketApp().run()
+
+while True:
+    get_air()
+    get_soil_wetness()
+    time.sleep(2)
