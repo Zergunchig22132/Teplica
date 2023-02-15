@@ -411,6 +411,8 @@ class TestApp(MDApp):
         layout3.add_widget(setting4)
         layout3.add_widget(setting5)
         layout3.add_widget(setting6)
+        test_label = Label(text='123456789012345678901234567890')
+        layout2.add_widget(test_label)
         carousel = Carousel(direction="right", ignore_perpendicular_swipes=True, loop=True)
         carousel.add_widget(layout1)
         carousel.add_widget(layout2)
@@ -445,7 +447,7 @@ class TestApp(MDApp):
             watering_button_5.update()
             watering_button_6.update()
             print(mid_temp_history)
-        Clock.schedule_interval(update_all, 0.1)
+        Clock.schedule_interval(update_all, 5)
 
         return carousel
 
