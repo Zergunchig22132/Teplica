@@ -351,7 +351,7 @@ class TestApp(MDApp):
             max_air_temp = int(value)
         max_temp_set = TextInput(multiline=False)
         max_temp_set.bind(text=on_temp_enter)
-        temp_hint_label = Label(text='Максимальная температура: ')
+        temp_hint_label = Label(text='Максимальная\nтемпература:')
         setting1 = BoxLayout(orientation='horizontal')
         setting1.add_widget(temp_hint_label)
         setting1.add_widget(max_temp_set)
@@ -360,14 +360,14 @@ class TestApp(MDApp):
             min_air_wetness = int(value)
         min_air_wet_set = TextInput(multiline=False)
         min_air_wet_set.bind(text=on_air_wet_enter)
-        air_wet_hint_label = Label(text='Минимальная влажность \nвоздуха: ')
+        air_wet_hint_label = Label(text='Минимальная\nвлажность\nвоздуха:')
         setting2 = BoxLayout(orientation='horizontal')
         setting2.add_widget(air_wet_hint_label)
         setting2.add_widget(min_air_wet_set)
         def on_soil_wet_enter(instance, value):
             global min_soil_wetness
             min_soil_wetness = int(value)
-        soil_wet_hint_label = Label(text='Минимальная влажность \nпочвы: ')
+        soil_wet_hint_label = Label(text='Минимальная\nвлажность\nпочвы: ')
         min_soil_wet_set = TextInput(multiline=False)
         min_soil_wet_set.bind(text=on_soil_wet_enter)
         setting3 = BoxLayout(orientation='horizontal')
@@ -378,7 +378,7 @@ class TestApp(MDApp):
             manual_mode = not manual_mode
         manual_mode_switch = Switch(active=False)
         manual_mode_switch.bind(active=manual_control_change)
-        manual_control_hint = Label(text='РУЧНОЕ УПРАВЛЕНИЕ')
+        manual_control_hint = Label(text='РУЧНОЕ\nУПРАВЛЕНИЕ')
         setting4 = BoxLayout(orientation='horizontal')
         setting4.add_widget(manual_control_hint)
         setting4.add_widget(manual_mode_switch)
@@ -391,16 +391,16 @@ class TestApp(MDApp):
         setting5 = BoxLayout(orientation='horizontal')
         setting5.add_widget(token_hint)
         setting5.add_widget(token_set)
-        graph_hint = Label(text='Переключение\nтаблицы и графика:')
-        graph_button = Button(text='Используется график')
+        graph_hint = Label(text='Переключение\nграфика:')
+        graph_button = Button(text='Используется\nграфик')
         def graph_change(*args):
             global graph
             if graph:
                 graph = not graph
-                graph_button.text = "Используется таблица"
+                graph_button.text = "Используется\nтаблица"
             else:
                 graph = not graph
-                graph_button.text = "Используется график"
+                graph_button.text = "Используется\nграфик"
         graph_button.bind(on_press=graph_change)
         setting6 = BoxLayout(orientation='horizontal')
         setting6.add_widget(graph_hint)
