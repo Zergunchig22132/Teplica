@@ -11,6 +11,7 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.carousel import Carousel
 from kivy.uix.button import Button
 from kivy.uix.switch import Switch
+from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.widget import Widget
 
 # Я использую списки, длина которых больше на один элемент для удобства.
@@ -32,7 +33,7 @@ max_air_temp = 29
 min_air_wetness = 30
 min_soil_wetness = 72
 graph = True
-temperature_history = {}
+temp_history = {}
 mid_temp_history = {}
 air_wetness_history = {}
 mid_air_wet_history = {}
@@ -298,6 +299,20 @@ class WateringButton6(Button):
             self.text = "Полив грядки " + str(self.number) + "\nНеактивен\n"
 
 
+class GraphLayout(FloatLayout):
+    global temp_history, mid_temp_history
+    global air_wetness_history, mid_air_wet_history
+    global soil_wet_history, mid_soil_wet_history
+    global start_time, current_time
+    current_mode = "offline"  # Добавить такие режимы, как
+    # "mid(temp, airwet, soilwet)"
+    # "temp(1,2,3,4)"
+    # "air(1,2,3,4)"
+    # "soil(1,2,3,4,5,6)"
+    time_period = [start_time, current_time]
+
+
+
 class TestApp(MDApp):
     global theme
     global mid_temperature, max_air_temp
@@ -349,42 +364,51 @@ class TestApp(MDApp):
         def on_temp_enter(instance, value):
             global max_air_temp
             max_air_temp = int(value)
+
         max_temp_set = TextInput(multiline=False)
         max_temp_set.bind(text=on_temp_enter)
         temp_hint_label = Label(text='Максимальная\nтемпература:')
         setting1 = BoxLayout(orientation='horizontal')
         setting1.add_widget(temp_hint_label)
         setting1.add_widget(max_temp_set)
+
         def on_air_wet_enter(instance, value):
             global min_air_wetness
             min_air_wetness = int(value)
+
         min_air_wet_set = TextInput(multiline=False)
         min_air_wet_set.bind(text=on_air_wet_enter)
         air_wet_hint_label = Label(text='Минимальная\nвлажность\nвоздуха:')
         setting2 = BoxLayout(orientation='horizontal')
         setting2.add_widget(air_wet_hint_label)
         setting2.add_widget(min_air_wet_set)
+
         def on_soil_wet_enter(instance, value):
             global min_soil_wetness
             min_soil_wetness = int(value)
+
         soil_wet_hint_label = Label(text='Минимальная\nвлажность\nпочвы: ')
         min_soil_wet_set = TextInput(multiline=False)
         min_soil_wet_set.bind(text=on_soil_wet_enter)
         setting3 = BoxLayout(orientation='horizontal')
         setting3.add_widget(soil_wet_hint_label)
         setting3.add_widget(min_soil_wet_set)
+
         def manual_control_change(*args):
             global manual_mode
             manual_mode = not manual_mode
+
         manual_mode_switch = Switch(active=False)
         manual_mode_switch.bind(active=manual_control_change)
         manual_control_hint = Label(text='РУЧНОЕ\nУПРАВЛЕНИЕ')
         setting4 = BoxLayout(orientation='horizontal')
         setting4.add_widget(manual_control_hint)
         setting4.add_widget(manual_mode_switch)
+
         def token_change(instance, value):
             global token
             token = str(value)
+
         token_set = TextInput(multiline=False)
         token_set.bind(text=token_change)
         token_hint = Label(text="Токен:")
@@ -393,6 +417,7 @@ class TestApp(MDApp):
         setting5.add_widget(token_set)
         graph_hint = Label(text='Переключение\nграфика:')
         graph_button = Button(text='Используется\nграфик')
+
         def graph_change(*args):
             global graph
             if graph:
@@ -401,6 +426,7 @@ class TestApp(MDApp):
             else:
                 graph = not graph
                 graph_button.text = "Используется\nграфик"
+
         graph_button.bind(on_press=graph_change)
         setting6 = BoxLayout(orientation='horizontal')
         setting6.add_widget(graph_hint)
@@ -411,25 +437,25 @@ class TestApp(MDApp):
         layout3.add_widget(setting4)
         layout3.add_widget(setting5)
         layout3.add_widget(setting6)
-        test_label = Label(text='123456789012345678901234567890')
-        layout2.add_widget(test_label)
+
         carousel = Carousel(direction="right", ignore_perpendicular_swipes=True, loop=True)
         carousel.add_widget(layout1)
         carousel.add_widget(layout2)
         carousel.add_widget(layout3)
+
         def update_all(*args):
             global temperature, mid_temperature, air_wetness
             global mid_air_wetness, soil_wetness, mid_soil_wetness
             global vents_open, watering, air_wetting, manual_mode
             global max_air_temp, min_air_wetness, min_soil_wetness
-            global temperature_history, mid_temp_history, air_wetness_history
+            global temp_history, mid_temp_history, air_wetness_history
             global mid_air_wet_history, soil_wet_history, mid_soil_wet_history
             global start_time, current_time
             get_air()
             get_soil_wetness()
             current_time = time.time()
             time_dif = round(current_time - start_time, 2)
-            temperature_history[time_dif] = temperature
+            temp_history[time_dif] = temperature
             mid_temp_history[time_dif] = mid_temperature
             air_wetness_history[time_dif] = air_wetness
             mid_air_wet_history[time_dif] = mid_air_wetness
@@ -447,7 +473,8 @@ class TestApp(MDApp):
             watering_button_5.update()
             watering_button_6.update()
             print(mid_temp_history)
-        Clock.schedule_interval(update_all, 5)
+
+        # Clock.schedule_interval(update_all, 0.05)
 
         return carousel
 
