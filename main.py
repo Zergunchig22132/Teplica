@@ -16,6 +16,7 @@ from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.widget import Widget
 from kivy.graphics import Color, Rectangle
 from kivymd.uix.datatables import MDDataTable
+from kivy.uix.spinner import Spinner
 
 # Я использую списки, длина которых больше на один элемент для удобства.
 # Порядковый номер устройства является индексом его переменной в списке.
@@ -344,7 +345,7 @@ class GraphLabel(Label):
     trans = 0
     number = 4
 
-    def set_graph_mode(self, mode):
+    def set_graph_mode(self, mode, number):
         self.mode = mode
 
     def update(self, *args):
@@ -596,9 +597,101 @@ class Greenhouse_Automatic_Control_SystemApp(MDApp):
         layout3.add_widget(setting5)
         layout3.add_widget(setting6)
 
+        current_mode_label = Label(text='Средняя температура')
+        tempspinner = Spinner(text='Температура',
+                              values=(
+                                  'Средняя\nтемпература', 'Температура 1', 'Температура 2', 'Температура 3',
+                                  'Температура 4')
+                              )
+        airwetspinner = Spinner(text='Влажность\nвоздуха',
+                                values=(
+                                    'Средняя\nвлажность\nвоздуха', 'Влажность\nвоздуха 1',
+                                    'Влажность\nвоздуха 2', 'Влажность\nвоздуха 3',
+                                    'Влажность\nвоздуха 4'
+                                ))
+        soilwetspinner = Spinner(text='Влажность\nпочвы',
+                                 values=(
+                                     'Средняя\nвлажность\nпочвы', 'Влажность\nпочвы 1',
+                                     'Влажность\nпочвы 2', 'Влажность\nпочвы 3',
+                                     'Влажность\nпочвы 4'
+                                 ))
+
+        def on_temp_spinner_set(spinner, text):
+            if text == 'Средняя\nтемпература':
+                graph_label.set_graph_mode('midtemp', 0)
+                current_mode_label.text = 'Средняя температура'
+            elif text == 'Температура 1':
+                graph_label.set_graph_mode('temp', 1)
+                current_mode_label.text = 'Датчик температуры 1'
+            elif text == 'Температура 2':
+                graph_label.set_graph_mode('temp', 2)
+                current_mode_label.text = 'Датчик температуры 2'
+            elif text == 'Температура 3':
+                graph_label.set_graph_mode('temp', 3)
+                current_mode_label.text = 'Датчик температуры 3'
+            elif text == 'Температура 4':
+                graph_label.set_graph_mode('temp', 4)
+                current_mode_label.text = 'Датчик температуры 4'
+
+        def on_air_wet_spinner_set(spinner, text):
+            if text == 'Средняя\nвлажность\nвоздуха':
+                graph_label.set_graph_mode('midairwet', 0)
+                current_mode_label.text = 'Средняя влажность воздуха'
+            elif text == 'Влажность\nвоздуха 1':
+                graph_label.set_graph_mode('air', 1)
+                current_mode_label.text = 'Датчик влажности 1'
+            elif text == 'Влажность\nвоздуха 2':
+                graph_label.set_graph_mode('air', 2)
+                current_mode_label.text = 'Датчик влажности 2'
+            elif text == 'Влажность\nвоздуха 3':
+                graph_label.set_graph_mode('air', 3)
+                current_mode_label.text = 'Датчик влажности 3'
+            elif text == 'Влажность\nвоздуха 4':
+                graph_label.set_graph_mode('air', 4)
+                current_mode_label.text = 'Датчик влажности 4'
+
+        def on_soil_wet_spinner_set(spinner, text):
+            if text == 'Средняя\nвлажность\nпочвы':
+                graph_label.set_graph_mode('midsoilwet', 0)
+                current_mode_label.text = 'Средняя влажность почвы'
+            elif text == 'Влажность\nпочвы 1':
+                graph_label.set_graph_mode('soil', 1)
+                current_mode_label.text = 'Датчик вляжности почвы 1'
+            elif text == 'Влажность\nпочвы 2':
+                graph_label.set_graph_mode('soil', 2)
+                current_mode_label.text = 'Датчик вляжности почвы 2'
+            elif text == 'Влажность\nпочвы 3':
+                graph_label.set_graph_mode('soil', 3)
+                current_mode_label.text = 'Датчик вляжности почвы 3'
+            elif text == 'Влажность\nпочвы 4':
+                graph_label.set_graph_mode('soil', 4)
+                current_mode_label.text = 'Датчик вляжности почвы 4'
+            elif text == 'Влажность\nпочвы 5':
+                graph_label.set_graph_mode('soil', 5)
+                current_mode_label.text = 'Датчик вляжности почвы 5'
+            elif text == 'Влажность\nпочвы 6':
+                graph_label.set_graph_mode('soil', 6)
+                current_mode_label.text = 'Датчик вляжности почвы 6'
+
+        spinner_layout = BoxLayout(orientation='horizontal')
+        spinner_layout.add_widget(tempspinner)
+        spinner_layout.add_widget(airwetspinner)
+        spinner_layout.add_widget(soilwetspinner)
+
+        tempspinner.bind(text=on_temp_spinner_set)
+        airwetspinner.bind(text=on_air_wet_spinner_set)
+        soilwetspinner.bind(text=on_soil_wet_spinner_set)
+
+        current_mode_label.pos_hint = {'x':0, 'y':0.05}
+        layout2.add_widget(spinner_layout)
+
+        floatlayout2 = FloatLayout()
+        floatlayout2.add_widget(layout2)
+        floatlayout2.add_widget(current_mode_label)
+
         carousel = Carousel(direction="right", ignore_perpendicular_swipes=False, loop=True)
         carousel.add_widget(layout1)
-        carousel.add_widget(layout2)
+        carousel.add_widget(floatlayout2)
         carousel.add_widget(layout3)
 
         def update_all(*args):
