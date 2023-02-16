@@ -1,6 +1,7 @@
 import requests
 import time
 import random
+import multiprocessing as mp
 
 from kivymd.app import MDApp
 from kivy.uix.textinput import TextInput
@@ -17,7 +18,7 @@ from kivy.uix.widget import Widget
 # Я использую списки, длина которых больше на один элемент для удобства.
 # Порядковый номер устройства является индексом его переменной в списке.
 temperature = [0, 0, 0, 0, 0]
-mid_temperature = 0
+mid_air_temp = 0
 air_wetness = [0, 0, 0, 0, 0]
 mid_air_wetness = 0
 soil_wetness = [0, 0, 0, 0, 0, 0, 0]
@@ -43,26 +44,43 @@ start_time = 0
 current_time = 0
 
 
-def get_air():
-    global temperature, air_wetness, mid_temperature, mid_air_wetness
+def get_air(*args):
+    global temperature, air_wetness, mid_air_temp, mid_air_wetness
+    global start_time, current_time, temp_history, mid_temp_history
+    global air_wetness_history, mid_air_wet_history
+    current_time = time.time()
+    time_dif = round(current_time - start_time, 2)
     for i in range(1, 5):
         json_temp = str(requests.get("https://dt.miet.ru/ppo_it/api/temp_hum/{}".format(str(i))).json())
         operational_list = json_temp.split()
         temperature[i] = float(str(operational_list[3])[0:-1])
         air_wetness[i] = float(str(operational_list[5])[0:-1])
+    temp_history[time_dif] = temperature
+    air_wetness_history[time_dif] = air_wetness
     tempsum = 0
     for k in temperature[1:]:
         tempsum += k
-    mid_temperature = round(tempsum / 4, 2)
+    mid_air_temp = round(tempsum / 4, 2)
+    mid_temp_history[time_dif] = mid_air_temp
+    tempsum = 0
+    for j in air_wetness[1:]:
+        tempsum += j
+    mid_air_wetness = round(tempsum / 4, 2)
+    mid_air_wet_history[time_dif] = mid_air_wetness
 
 
-def get_soil_wetness():
-    global soil_wetness, mid_soil_wetness
+def get_soil_wetness(*args):
+    global soil_wetness, mid_soil_wetness, start_time, current_time
+    global soil_wet_history, mid_soil_wet_history
+    current_time = time.time()
+    time_dif = round(current_time - start_time, 2)
     for i in range(1, 7):
         json_soil = str(requests.get("https://dt.miet.ru/ppo_it/api/hum/{}".format(str(i))).json())
         json_soil = json_soil.split()
         soil_wetness[i] = float(str(json_soil[3])[0:-1])
+    soil_wet_history[time_dif] = soil_wetness
     mid_soil_wetness = round(sum(soil_wetness[1:]) / 6, 2)
+    mid_soil_wet_history[time_dif] = mid_soil_wetness
 
 
 def change_vents():
@@ -111,27 +129,29 @@ class MidSoilHumudificationLabel(Label):
 
 
 class MidAirHumidificationLabel(Label):
-    global mid_temperature
+    global mid_air_temp
 
     def update(self, *args):
-        self.text = "ВЛАЖНОСТЬ ВОЗДУХА: " + str(mid_temperature) + " %"
+        self.text = "ВЛАЖНОСТЬ ВОЗДУХА: " + str(mid_air_temp) + " %"
 
 
 class MidTemperatureLabel(Label):
     pos_hint_x = -0.1
-    global mid_temperature
+    global mid_air_temp
 
     def update(self, *args):
-        self.text = "СРЕДНЯЯ ТЕМПЕРАТУРА: " + str(mid_temperature) + " °C"
+        self.text = "СРЕДНЯЯ ТЕМПЕРАТУРА: " + str(mid_air_temp) + " °C"
 
 
 class VentsButton(Button):
-    global vents_open, mid_temperature, max_air_temp
+    global vents_open, mid_air_temp, max_air_temp, manual_mode
 
     def update(self, *args):
-        if mid_temperature > max_air_temp:
+        if manual_mode:
             self.disabled = False
-        elif mid_temperature <= max_air_temp and vents_open:
+        elif mid_air_temp > max_air_temp:
+            self.disabled = False
+        elif mid_air_temp <= max_air_temp and vents_open:
             self.disabled = False
         else:
             self.disabled = True
@@ -146,9 +166,12 @@ class VentsButton(Button):
 
 class AirWettingButton(Button):
     global air_wetness, mid_air_wetness, air_wetting, min_air_wetness
+    global manual_mode
 
     def update(self, *args):
-        if mid_air_wetness < min_air_wetness:
+        if manual_mode:
+            self.disabled = False
+        elif mid_air_wetness < min_air_wetness:
             self.disabled = False
         elif mid_air_wetness > min_air_wetness and air_wetting:
             self.disabled = False
@@ -312,10 +335,9 @@ class GraphLayout(FloatLayout):
     time_period = [start_time, current_time]
 
 
-
 class TestApp(MDApp):
     global theme
-    global mid_temperature, max_air_temp
+    global mid_air_temp, max_air_temp
 
     def build(self):
         self.theme_cls.theme_style = theme
@@ -443,6 +465,7 @@ class TestApp(MDApp):
         carousel.add_widget(layout2)
         carousel.add_widget(layout3)
 
+
         def update_all(*args):
             global temperature, mid_temperature, air_wetness
             global mid_air_wetness, soil_wetness, mid_soil_wetness
@@ -474,7 +497,7 @@ class TestApp(MDApp):
             watering_button_6.update()
             print(mid_temp_history)
 
-        # Clock.schedule_interval(update_all, 0.05)
+        Clock.schedule_interval(update_all, 0.1)
 
         return carousel
 
