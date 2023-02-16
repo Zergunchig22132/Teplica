@@ -334,7 +334,7 @@ class GraphLabel(Label):
     global air_wetness_history, mid_air_wet_history
     global soil_wet_history, mid_soil_wet_history
     global start_time, current_time
-    mode = "air"  # Добавить такие режимы, как
+    mode = "midtemp"  # Добавить такие режимы, как
     # "mid(temp, airwet, soilwet)"
     # "temp(1,2,3,4)"
     # "air(1,2,3,4)"
@@ -348,101 +348,125 @@ class GraphLabel(Label):
         self.mode = mode
 
     def update(self, *args):
-        if self.mode == "midtemp":
-            items = list(mid_temp_history.values())
-            using = []
-            for i in range(1, len(items) + 1):
-                using.append(items[-i])
-            if len(using) < 10:
-                for k in range(10 - len(using)):
-                    using.append(0)
-            else:
-                using = using[0:10]
-            self.text = ''
-            for j in using:
-                if len(str(j)) > 4:
-                    self.text += str(j) + '°C' + '|' * int(j) + '\n'
+        if graph:
+            if self.mode == "midtemp":
+                items = list(mid_temp_history.values())
+                using = []
+                for i in range(1, len(items) + 1):
+                    using.append(items[-i])
+                if len(using) < 10:
+                    for k in range(10 - len(using)):
+                        using.append(0)
                 else:
-                    self.text += str(j) + '0' * (5 - len(str(j))) + '°C' + "|" * int(j) + '\n'
-        elif self.mode == "midairwet":
-            items = list(mid_air_wet_history.values())
-            using = []
-            for i in range(1, len(items) + 1):
-                using.append(items[-i])
-            if len(using) < 10:
-                for k in range(10 - len(using)):
-                    using.append(0)
-            else:
-                using = using[0:10]
-            self.text = ''
-            for j in using:
-                if len(str(j)) > 4:
-                    self.text += str(j) + '%' + '|' * int(j/2) + '\n'
+                    using = using[0:10]
+                self.text = ''
+                for j in using:
+                    if len(str(j)) > 4:
+                        self.text += str(j) + '°C' + '|' * int(j) + '\n'
+                    else:
+                        self.text += str(j) + '0' * (5 - len(str(j))) + '°C' + "|" * int(j) + '\n'
+            elif self.mode == "midairwet":
+                items = list(mid_air_wet_history.values())
+                using = []
+                for i in range(1, len(items) + 1):
+                    using.append(items[-i])
+                if len(using) < 10:
+                    for k in range(10 - len(using)):
+                        using.append(0)
                 else:
-                    self.text += str(j) + '0' * (5 - len(str(j))) + '%' + "|" * int(j/2) + '\n'
-        elif self.mode == "midsoilwet":
-            items = list(mid_soil_wet_history.values())
-            using = []
-            for i in range(1, len(items) + 1):
-                using.append(items[-i])
-            if len(using) < 10:
-                for k in range(10 - len(using)):
-                    using.append(0)
-            else:
-                using = using[0:10]
-            self.text = ''
-            for j in using:
-                if len(str(j)) > 4:
-                    self.text += str(j) + '%' + '|' * int(j / 2) + '\n'
+                    using = using[0:10]
+                self.text = ''
+                for j in using:
+                    if len(str(j)) > 4:
+                        self.text += str(j) + '%' + '|' * int(j / 2) + '\n'
+                    else:
+                        self.text += str(j) + '0' * (5 - len(str(j))) + '%' + "|" * int(j / 2) + '\n'
+            elif self.mode == "midsoilwet":
+                items = list(mid_soil_wet_history.values())
+                using = []
+                for i in range(1, len(items) + 1):
+                    using.append(items[-i])
+                if len(using) < 10:
+                    for k in range(10 - len(using)):
+                        using.append(0)
                 else:
-                    self.text += str(j) + '0' * (5 - len(str(j))) + '%' + "|" * int(j / 2) + '\n'
-        elif self.mode == 'temp':
-            items = list(temp_history.values())
-            using = []
-            for i in items:
-                using.append(i[self.number])
-            using.reverse()
-            if len(using) < 10:
-                for k in range(10 - len(using)):
-                    using.append(0)
-            self.text = ''
-            for j in using[0:10]:
-                if len(str(j)) > 4:
-                    self.text += str(j) + '°C' + '|' * int(j) + '\n'
-                else:
-                    self.text += str(j) + '0' * (5 - len(str(j))) + '°C' + "|" * int(j) + '\n'
-        elif self.mode == 'air':
-            items = list(air_wetness_history.values())
-            using = []
-            for i in items:
-                using.append(i[self.number])
-            using.reverse()
-            if len(using) < 10:
-                for k in range(10 - len(using)):
-                    using.append(0)
-            self.text = ''
-            for j in using[0:10]:
-                if len(str(j)) > 4:
-                    self.text += str(j) + '%' + '|' * int(j/2) + '\n'
-                else:
-                    self.text += str(j) + '0' * (5 - len(str(j))) + '%' + "|" * int(j/2) + '\n'
-        elif self.mode == 'soil':
-            items = list(soil_wet_history.values())
-            using = []
-            for i in items:
-                using.append(i[self.number])
-            using.reverse()
-            if len(using) < 10:
-                for k in range(10 - len(using)):
-                    using.append(0)
-            self.text = ''
-            for j in using[0:10]:
-                if len(str(j)) > 4:
-                    self.text += str(j) + '%' + '|' * int(j / 2) + '\n'
-                else:
-                    self.text += str(j) + '0' * (5 - len(str(j))) + '%' + "|" * int(j / 2) + '\n'
+                    using = using[0:10]
+                self.text = ''
+                for j in using:
+                    if len(str(j)) > 4:
+                        self.text += str(j) + '%' + '|' * int(j / 2) + '\n'
+                    else:
+                        self.text += str(j) + '0' * (5 - len(str(j))) + '%' + "|" * int(j / 2) + '\n'
+            elif self.mode == 'temp':
+                items = list(temp_history.values())
+                using = []
+                for i in items:
+                    using.append(i[self.number])
+                using.reverse()
+                if len(using) < 10:
+                    for k in range(10 - len(using)):
+                        using.append(0)
+                self.text = ''
+                for j in using[0:10]:
+                    if len(str(j)) > 4:
+                        self.text += str(j) + '°C' + '|' * int(j) + '\n'
+                    else:
+                        self.text += str(j) + '0' * (5 - len(str(j))) + '°C' + "|" * int(j) + '\n'
+            elif self.mode == 'air':
+                items = list(air_wetness_history.values())
+                using = []
+                for i in items:
+                    using.append(i[self.number])
+                using.reverse()
+                if len(using) < 10:
+                    for k in range(10 - len(using)):
+                        using.append(0)
+                self.text = ''
+                for j in using[0:10]:
+                    if len(str(j)) > 4:
+                        self.text += str(j) + '%' + '|' * int(j / 2) + '\n'
+                    else:
+                        self.text += str(j) + '0' * (5 - len(str(j))) + '%' + "|" * int(j / 2) + '\n'
+            elif self.mode == 'soil':
+                items = list(soil_wet_history.values())
+                using = []
+                for i in items:
+                    using.append(i[self.number])
+                using.reverse()
+                if len(using) < 10:
+                    for k in range(10 - len(using)):
+                        using.append(0)
+                self.text = ''
+                for j in using[0:10]:
+                    if len(str(j)) > 4:
+                        self.text += str(j) + '%' + '|' * int(j / 2) + '\n'
+                    else:
+                        self.text += str(j) + '0' * (5 - len(str(j))) + '%' + "|" * int(j / 2) + '\n'
         if not graph:
-            self.text = ''
+            if self.mode == "midtemp":
+                keyslist = list(mid_temp_history.keys())
+                print(keyslist)
+                self.text = '#################################\n'
+                if len(keyslist) < 6:
+                    for k in keyslist:
+                        print(k, mid_temp_history[k])
+                        localvalue = str(mid_temp_history[k])
+                        if len(localvalue) < 5:
+                            localvalue += '0' * (5 - len(localvalue))
+                        localtext = self.text
+                        localtext += '#   ' + localvalue + '°C   #   ' + time.ctime(k + start_time) + '   #\n'
+                        localtext += '#################################\n'
+                        self.text = localtext
+                else:
+                    for k in keyslist[-6:]:
+                        print(k, mid_temp_history[k])
+                        localvalue = str(mid_temp_history[k])
+                        if len(localvalue) < 5:
+                            localvalue += '0' * (5 - len(localvalue))
+                        localtext = self.text
+                        localtext += '#   ' + localvalue + '°C   #   ' + time.ctime(k + start_time) + '   #\n'
+                        localtext += '#################################\n'
+                        self.text = localtext
 
 
 class Greenhouse_Automatic_Control_SystemApp(MDApp):
@@ -492,22 +516,17 @@ class Greenhouse_Automatic_Control_SystemApp(MDApp):
         layout1.add_widget(watering_layout1)
         layout1.add_widget(watering_layout2)
         layout1.add_widget(watering_layout3)
-        graph_line = GraphLabel()
-        graph_layout = BoxLayout(orientation='vertical')
-        graph_layout.add_widget(graph_line)
-        layout2.add_widget(graph_layout)
+        graph_label = GraphLabel()
+        layout2.add_widget(graph_label)
 
         def graph_change(*args):
             global graph
             if graph:
                 graph = not graph
                 graph_button.text = "Используется\nтаблица"
-                layout2.add_widget(graph_layout)
             else:
                 graph = not graph
                 graph_button.text = "Используется\nграфик"
-                layout2.remove_widget(graph_layout)
-
 
         def on_temp_enter(instance, value):
             global max_air_temp
@@ -605,7 +624,7 @@ class Greenhouse_Automatic_Control_SystemApp(MDApp):
             watering_button_4.update()
             watering_button_5.update()
             watering_button_6.update()
-            graph_line.update()
+            graph_label.update()
 
         Clock.schedule_interval(update_all, 3)
 
