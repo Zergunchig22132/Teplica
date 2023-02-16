@@ -14,6 +14,8 @@ from kivy.uix.button import Button
 from kivy.uix.switch import Switch
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.widget import Widget
+from kivy.graphics import Color, Rectangle
+from kivymd.uix.datatables import MDDataTable
 
 # Я использую списки, длина которых больше на один элемент для удобства.
 # Порядковый номер устройства является индексом его переменной в списке.
@@ -40,7 +42,7 @@ air_wetness_history = {}
 mid_air_wet_history = {}
 soil_wet_history = {}
 mid_soil_wet_history = {}
-start_time = 0
+start_time = time.time()
 current_time = 0
 
 
@@ -49,21 +51,24 @@ def get_air(*args):
     global start_time, current_time, temp_history, mid_temp_history
     global air_wetness_history, mid_air_wet_history
     current_time = time.time()
+    localtemp, localwet = [0, 0, 0, 0, 0], [0, 0, 0, 0, 0]
     time_dif = round(current_time - start_time, 2)
     for i in range(1, 5):
         json_temp = str(requests.get("https://dt.miet.ru/ppo_it/api/temp_hum/{}".format(str(i))).json())
         operational_list = json_temp.split()
         temperature[i] = float(str(operational_list[3])[0:-1])
         air_wetness[i] = float(str(operational_list[5])[0:-1])
-    temp_history[time_dif] = temperature
-    air_wetness_history[time_dif] = air_wetness
+        localtemp[i] = float(str(operational_list[3])[0:-1])
+        localwet[i] = float(str(operational_list[5])[0:-1])
+    temp_history[time_dif] = localtemp
+    air_wetness_history[time_dif] = localwet
     tempsum = 0
-    for k in temperature[1:]:
+    for k in localtemp[1:]:
         tempsum += k
     mid_air_temp = round(tempsum / 4, 2)
     mid_temp_history[time_dif] = mid_air_temp
     tempsum = 0
-    for j in air_wetness[1:]:
+    for j in localwet[1:]:
         tempsum += j
     mid_air_wetness = round(tempsum / 4, 2)
     mid_air_wet_history[time_dif] = mid_air_wetness
@@ -71,14 +76,16 @@ def get_air(*args):
 
 def get_soil_wetness(*args):
     global soil_wetness, mid_soil_wetness, start_time, current_time
-    global soil_wet_history, mid_soil_wet_history
+    global soil_wet_history, mid_soil_wet_history, start_time
     current_time = time.time()
+    localsoil = [0, 0, 0, 0, 0, 0, 0]
     time_dif = round(current_time - start_time, 2)
     for i in range(1, 7):
         json_soil = str(requests.get("https://dt.miet.ru/ppo_it/api/hum/{}".format(str(i))).json())
         json_soil = json_soil.split()
         soil_wetness[i] = float(str(json_soil[3])[0:-1])
-    soil_wet_history[time_dif] = soil_wetness
+        localsoil[i] = float(str(json_soil[3])[0:-1])
+    soil_wet_history[time_dif] = localsoil
     mid_soil_wetness = round(sum(soil_wetness[1:]) / 6, 2)
     mid_soil_wet_history[time_dif] = mid_soil_wetness
 
@@ -322,20 +329,123 @@ class WateringButton6(Button):
             self.text = "Полив грядки " + str(self.number) + "\nНеактивен\n"
 
 
-class GraphLayout(FloatLayout):
+class GraphLabel(Label):
     global temp_history, mid_temp_history
     global air_wetness_history, mid_air_wet_history
     global soil_wet_history, mid_soil_wet_history
     global start_time, current_time
-    current_mode = "offline"  # Добавить такие режимы, как
+    mode = "air"  # Добавить такие режимы, как
     # "mid(temp, airwet, soilwet)"
     # "temp(1,2,3,4)"
     # "air(1,2,3,4)"
     # "soil(1,2,3,4,5,6)"
     time_period = [start_time, current_time]
+    scale = 1
+    trans = 0
+    number = 4
+
+    def set_graph_mode(self, mode):
+        self.mode = mode
+
+    def update(self, *args):
+        if self.mode == "midtemp":
+            items = list(mid_temp_history.values())
+            using = []
+            for i in range(1, len(items) + 1):
+                using.append(items[-i])
+            if len(using) < 10:
+                for k in range(10 - len(using)):
+                    using.append(0)
+            else:
+                using = using[0:10]
+            self.text = ''
+            for j in using:
+                if len(str(j)) > 4:
+                    self.text += str(j) + '°C' + '|' * int(j) + '\n'
+                else:
+                    self.text += str(j) + '0' * (5 - len(str(j))) + '°C' + "|" * int(j) + '\n'
+        elif self.mode == "midairwet":
+            items = list(mid_air_wet_history.values())
+            using = []
+            for i in range(1, len(items) + 1):
+                using.append(items[-i])
+            if len(using) < 10:
+                for k in range(10 - len(using)):
+                    using.append(0)
+            else:
+                using = using[0:10]
+            self.text = ''
+            for j in using:
+                if len(str(j)) > 4:
+                    self.text += str(j) + '%' + '|' * int(j/2) + '\n'
+                else:
+                    self.text += str(j) + '0' * (5 - len(str(j))) + '%' + "|" * int(j/2) + '\n'
+        elif self.mode == "midsoilwet":
+            items = list(mid_soil_wet_history.values())
+            using = []
+            for i in range(1, len(items) + 1):
+                using.append(items[-i])
+            if len(using) < 10:
+                for k in range(10 - len(using)):
+                    using.append(0)
+            else:
+                using = using[0:10]
+            self.text = ''
+            for j in using:
+                if len(str(j)) > 4:
+                    self.text += str(j) + '%' + '|' * int(j / 2) + '\n'
+                else:
+                    self.text += str(j) + '0' * (5 - len(str(j))) + '%' + "|" * int(j / 2) + '\n'
+        elif self.mode == 'temp':
+            items = list(temp_history.values())
+            using = []
+            for i in items:
+                using.append(i[self.number])
+            using.reverse()
+            if len(using) < 10:
+                for k in range(10 - len(using)):
+                    using.append(0)
+            self.text = ''
+            for j in using[0:10]:
+                if len(str(j)) > 4:
+                    self.text += str(j) + '°C' + '|' * int(j) + '\n'
+                else:
+                    self.text += str(j) + '0' * (5 - len(str(j))) + '°C' + "|" * int(j) + '\n'
+        elif self.mode == 'air':
+            items = list(air_wetness_history.values())
+            using = []
+            for i in items:
+                using.append(i[self.number])
+            using.reverse()
+            if len(using) < 10:
+                for k in range(10 - len(using)):
+                    using.append(0)
+            self.text = ''
+            for j in using[0:10]:
+                if len(str(j)) > 4:
+                    self.text += str(j) + '%' + '|' * int(j/2) + '\n'
+                else:
+                    self.text += str(j) + '0' * (5 - len(str(j))) + '%' + "|" * int(j/2) + '\n'
+        elif self.mode == 'soil':
+            items = list(soil_wet_history.values())
+            using = []
+            for i in items:
+                using.append(i[self.number])
+            using.reverse()
+            if len(using) < 10:
+                for k in range(10 - len(using)):
+                    using.append(0)
+            self.text = ''
+            for j in using[0:10]:
+                if len(str(j)) > 4:
+                    self.text += str(j) + '%' + '|' * int(j / 2) + '\n'
+                else:
+                    self.text += str(j) + '0' * (5 - len(str(j))) + '%' + "|" * int(j / 2) + '\n'
+        if not graph:
+            self.text = ''
 
 
-class TestApp(MDApp):
+class Greenhouse_Automatic_Control_SystemApp(MDApp):
     global theme
     global mid_air_temp, max_air_temp
 
@@ -382,6 +492,22 @@ class TestApp(MDApp):
         layout1.add_widget(watering_layout1)
         layout1.add_widget(watering_layout2)
         layout1.add_widget(watering_layout3)
+        graph_line = GraphLabel()
+        graph_layout = BoxLayout(orientation='vertical')
+        graph_layout.add_widget(graph_line)
+        layout2.add_widget(graph_layout)
+
+        def graph_change(*args):
+            global graph
+            if graph:
+                graph = not graph
+                graph_button.text = "Используется\nтаблица"
+                layout2.add_widget(graph_layout)
+            else:
+                graph = not graph
+                graph_button.text = "Используется\nграфик"
+                layout2.remove_widget(graph_layout)
+
 
         def on_temp_enter(instance, value):
             global max_air_temp
@@ -440,15 +566,6 @@ class TestApp(MDApp):
         graph_hint = Label(text='Переключение\nграфика:')
         graph_button = Button(text='Используется\nграфик')
 
-        def graph_change(*args):
-            global graph
-            if graph:
-                graph = not graph
-                graph_button.text = "Используется\nтаблица"
-            else:
-                graph = not graph
-                graph_button.text = "Используется\nграфик"
-
         graph_button.bind(on_press=graph_change)
         setting6 = BoxLayout(orientation='horizontal')
         setting6.add_widget(graph_hint)
@@ -460,11 +577,10 @@ class TestApp(MDApp):
         layout3.add_widget(setting5)
         layout3.add_widget(setting6)
 
-        carousel = Carousel(direction="right", ignore_perpendicular_swipes=True, loop=True)
+        carousel = Carousel(direction="right", ignore_perpendicular_swipes=False, loop=True)
         carousel.add_widget(layout1)
         carousel.add_widget(layout2)
         carousel.add_widget(layout3)
-
 
         def update_all(*args):
             global temperature, mid_temperature, air_wetness
@@ -474,16 +590,10 @@ class TestApp(MDApp):
             global temp_history, mid_temp_history, air_wetness_history
             global mid_air_wet_history, soil_wet_history, mid_soil_wet_history
             global start_time, current_time
+            current_time = time.time()
             get_air()
             get_soil_wetness()
             current_time = time.time()
-            time_dif = round(current_time - start_time, 2)
-            temp_history[time_dif] = temperature
-            mid_temp_history[time_dif] = mid_temperature
-            air_wetness_history[time_dif] = air_wetness
-            mid_air_wet_history[time_dif] = mid_air_wetness
-            soil_wet_history[time_dif] = soil_wetness
-            mid_soil_wet_history[time_dif] = mid_soil_wetness
             midtemplabel.update()
             midairwetnesslabel.update()
             midsoilwetnesslabel.update()
@@ -495,9 +605,9 @@ class TestApp(MDApp):
             watering_button_4.update()
             watering_button_5.update()
             watering_button_6.update()
-            print(mid_temp_history)
+            graph_line.update()
 
-        Clock.schedule_interval(update_all, 0.1)
+        Clock.schedule_interval(update_all, 3)
 
         return carousel
 
@@ -506,4 +616,4 @@ class TestApp(MDApp):
         start_time = time.time()
 
 
-TestApp().run()
+Greenhouse_Automatic_Control_SystemApp().run()
