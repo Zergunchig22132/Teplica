@@ -61,6 +61,8 @@ def get_air(*args):
         air_wetness[i] = float(str(operational_list[5])[0:-1])
         localtemp[i] = float(str(operational_list[3])[0:-1])
         localwet[i] = float(str(operational_list[5])[0:-1])
+    print(air_wetness_history)
+    print(temp_history)
     temp_history[time_dif] = localtemp
     air_wetness_history[time_dif] = localwet
     tempsum = 0
@@ -140,7 +142,7 @@ class MidAirHumidificationLabel(Label):
     global mid_air_temp
 
     def update(self, *args):
-        self.text = "ВЛАЖНОСТЬ ВОЗДУХА: " + str(mid_air_temp) + " %"
+        self.text = "ВЛАЖНОСТЬ ВОЗДУХА: " + str(mid_air_wetness) + " %"
 
 
 class MidTemperatureLabel(Label):
@@ -347,6 +349,7 @@ class GraphLabel(Label):
 
     def set_graph_mode(self, mode, number):
         self.mode = mode
+        self.number = number
 
     def update(self, *args):
         if graph:
@@ -446,11 +449,9 @@ class GraphLabel(Label):
         if not graph:
             if self.mode == "midtemp":
                 keyslist = list(mid_temp_history.keys())
-                print(keyslist)
                 self.text = '#################################\n'
                 if len(keyslist) < 6:
                     for k in keyslist:
-                        print(k, mid_temp_history[k])
                         localvalue = str(mid_temp_history[k])
                         if len(localvalue) < 5:
                             localvalue += '0' * (5 - len(localvalue))
@@ -460,7 +461,6 @@ class GraphLabel(Label):
                         self.text = localtext
                 else:
                     for k in keyslist[-6:]:
-                        print(k, mid_temp_history[k])
                         localvalue = str(mid_temp_history[k])
                         if len(localvalue) < 5:
                             localvalue += '0' * (5 - len(localvalue))
@@ -468,6 +468,113 @@ class GraphLabel(Label):
                         localtext += '#   ' + localvalue + '°C   #   ' + time.ctime(k + start_time) + '   #\n'
                         localtext += '#################################\n'
                         self.text = localtext
+            elif self.mode == 'midsoilwet':
+                keyslist = list(mid_soil_wet_history.keys())
+                self.text = '#################################\n'
+                if len(keyslist) < 6:
+                    for k in keyslist:
+                        localvalue = str(mid_soil_wet_history[k])
+                        if len(localvalue) < 5:
+                            localvalue += '0' * (5 - len(localvalue))
+                        localtext = self.text
+                        localtext += '#   ' + localvalue + '%   #   ' + time.ctime(k + start_time) + '   #\n'
+                        localtext += '#################################\n'
+                        self.text = localtext
+                else:
+                    for k in keyslist[-6:]:
+                        localvalue = str(mid_soil_wet_history[k])
+                        if len(localvalue) < 5:
+                            localvalue += '0' * (5 - len(localvalue))
+                        localtext = self.text
+                        localtext += '#   ' + localvalue + '%   #   ' + time.ctime(k + start_time) + '   #\n'
+                        localtext += '#################################\n'
+                        self.text = localtext
+            elif self.mode == "midairwet":
+                keyslist = list(mid_air_wet_history.keys())
+                self.text = '#################################\n'
+                if len(keyslist) < 6:
+                    for k in keyslist:
+                        localvalue = str(mid_air_wet_history[k])
+                        if len(localvalue) < 5:
+                            localvalue += '0' * (5 - len(localvalue))
+                        localtext = self.text
+                        localtext += '#   ' + localvalue + '%   #   ' + time.ctime(k + start_time) + '   #\n'
+                        localtext += '#################################\n'
+                        self.text = localtext
+                else:
+                    for k in keyslist[-6:]:
+                        localvalue = str(mid_air_wet_history[k])
+                        if len(localvalue) < 5:
+                            localvalue += '0' * (5 - len(localvalue))
+                        localtext = self.text
+                        localtext += '#   ' + localvalue + '%   #   ' + time.ctime(k + start_time) + '   #\n'
+                        localtext += '#################################\n'
+                        self.text = localtext
+            elif self.mode == 'temp':
+                keyslist = list(temp_history.keys())
+                self.text = '#################################\n'
+                if len(keyslist) < 6:
+                    for k in keyslist:
+                        localvalue = str(temp_history[k][self.number])
+                        if len(localvalue) < 5:
+                            localvalue += '0' * (5 - len(localvalue))
+                        localtext = self.text
+                        localtext += '#   ' + localvalue + '°C   #   ' + time.ctime(k + start_time) + '   #\n'
+                        localtext += '#################################\n'
+                        self.text = localtext
+                else:
+                    print(keyslist[-6:])
+                    for k in keyslist[-6:]:
+                        localvalue = str(temp_history[k][self.number])
+                        if len(localvalue) < 5:
+                            localvalue += '0' * (5 - len(localvalue))
+                        localtext = self.text
+                        localtext += '#   ' + localvalue + '°C   #   ' + time.ctime(k + start_time) + '   #\n'
+                        localtext += '#################################\n'
+                        self.text = localtext
+            elif self.mode == 'air':
+                keyslist = list(air_wetness_history.keys())
+                self.text = '#################################\n'
+                if len(keyslist) < 6:
+                    for k in keyslist:
+                        localvalue = str(air_wetness_history[k][self.number])
+                        if len(localvalue) < 5:
+                            localvalue += '0' * (5 - len(localvalue))
+                        localtext = self.text
+                        localtext += '#   ' + localvalue + '%   #   ' + time.ctime(k + start_time) + '   #\n'
+                        localtext += '#################################\n'
+                        self.text = localtext
+                else:
+                    for k in keyslist[-6:]:
+                        localvalue = str(air_wetness_history[k][self.number])
+                        if len(localvalue) < 5:
+                            localvalue += '0' * (5 - len(localvalue))
+                        localtext = self.text
+                        localtext += '#   ' + localvalue + '%   #   ' + time.ctime(k + start_time) + '   #\n'
+                        localtext += '#################################\n'
+                        self.text = localtext
+            elif self.mode == 'soil':
+                keyslist = list(soil_wet_history.keys())
+                self.text = '#################################\n'
+                if len(keyslist) < 6:
+                    for k in keyslist:
+                        localvalue = str(soil_wet_history[k][self.number])
+                        if len(localvalue) < 5:
+                            localvalue += '0' * (5 - len(localvalue))
+                        localtext = self.text
+                        localtext += '#   ' + localvalue + '%   #   ' + time.ctime(k + start_time) + '   #\n'
+                        localtext += '#################################\n'
+                        self.text = localtext
+                else:
+                    for k in keyslist[-6:]:
+                        localvalue = str(soil_wet_history[k][self.number])
+                        if len(localvalue) < 5:
+                            localvalue += '0' * (5 - len(localvalue))
+                        localtext = self.text
+                        localtext += '#   ' + localvalue + '%   #   ' + time.ctime(k + start_time) + '   #\n'
+                        localtext += '#################################\n'
+                        self.text = localtext
+
 
 
 class Greenhouse_Automatic_Control_SystemApp(MDApp):
