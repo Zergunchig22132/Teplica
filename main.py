@@ -1,11 +1,10 @@
 import requests
 import time
-import random
-import multiprocessing as mp
+# import random
+# import multiprocessing as mp
 
 from kivymd.app import MDApp
 from kivy.uix.textinput import TextInput
-from kivymd.uix.screen import MDScreen
 from kivy.uix.label import Label
 from kivy.clock import Clock
 from kivy.uix.boxlayout import BoxLayout
@@ -13,9 +12,6 @@ from kivy.uix.carousel import Carousel
 from kivy.uix.button import Button
 from kivy.uix.switch import Switch
 from kivy.uix.floatlayout import FloatLayout
-from kivy.uix.widget import Widget
-from kivy.graphics import Color, Rectangle
-from kivymd.uix.datatables import MDDataTable
 from kivy.uix.spinner import Spinner
 
 # Я использую списки, длина которых больше на один элемент для удобства.
@@ -61,8 +57,6 @@ def get_air(*args):
         air_wetness[i] = float(str(operational_list[5])[0:-1])
         localtemp[i] = float(str(operational_list[3])[0:-1])
         localwet[i] = float(str(operational_list[5])[0:-1])
-    print(air_wetness_history)
-    print(temp_history)
     temp_history[time_dif] = localtemp
     air_wetness_history[time_dif] = localwet
     tempsum = 0
@@ -449,15 +443,15 @@ class GraphLabel(Label):
         if not graph:
             if self.mode == "midtemp":
                 keyslist = list(mid_temp_history.keys())
-                self.text = '#################################\n'
+                self.text = '##########################\n'
                 if len(keyslist) < 6:
                     for k in keyslist:
                         localvalue = str(mid_temp_history[k])
                         if len(localvalue) < 5:
                             localvalue += '0' * (5 - len(localvalue))
                         localtext = self.text
-                        localtext += '#   ' + localvalue + '°C   #   ' + time.ctime(k + start_time) + '   #\n'
-                        localtext += '#################################\n'
+                        localtext += '#   ' + localvalue + '°C   #   ' + time.ctime(k + start_time)[3:-4] + '   #\n'
+                        localtext += '##########################\n'
                         self.text = localtext
                 else:
                     for k in keyslist[-6:]:
@@ -465,20 +459,20 @@ class GraphLabel(Label):
                         if len(localvalue) < 5:
                             localvalue += '0' * (5 - len(localvalue))
                         localtext = self.text
-                        localtext += '#   ' + localvalue + '°C   #   ' + time.ctime(k + start_time) + '   #\n'
-                        localtext += '#################################\n'
+                        localtext += '#   ' + localvalue + '°C   #   ' + time.ctime(k + start_time)[3:-4] + '   #\n'
+                        localtext += '##########################\n'
                         self.text = localtext
             elif self.mode == 'midsoilwet':
                 keyslist = list(mid_soil_wet_history.keys())
-                self.text = '#################################\n'
+                self.text = '##########################\n'
                 if len(keyslist) < 6:
                     for k in keyslist:
                         localvalue = str(mid_soil_wet_history[k])
                         if len(localvalue) < 5:
                             localvalue += '0' * (5 - len(localvalue))
                         localtext = self.text
-                        localtext += '#   ' + localvalue + '%   #   ' + time.ctime(k + start_time) + '   #\n'
-                        localtext += '#################################\n'
+                        localtext += '#   ' + localvalue + '%   #   ' + time.ctime(k + start_time)[3:-4] + '   #\n'
+                        localtext += '##########################\n'
                         self.text = localtext
                 else:
                     for k in keyslist[-6:]:
@@ -486,20 +480,20 @@ class GraphLabel(Label):
                         if len(localvalue) < 5:
                             localvalue += '0' * (5 - len(localvalue))
                         localtext = self.text
-                        localtext += '#   ' + localvalue + '%   #   ' + time.ctime(k + start_time) + '   #\n'
-                        localtext += '#################################\n'
+                        localtext += '#   ' + localvalue + '%   #   ' + time.ctime(k + start_time)[3:-4] + '   #\n'
+                        localtext += '##########################\n'
                         self.text = localtext
             elif self.mode == "midairwet":
                 keyslist = list(mid_air_wet_history.keys())
-                self.text = '#################################\n'
+                self.text = '##########################\n'
                 if len(keyslist) < 6:
                     for k in keyslist:
                         localvalue = str(mid_air_wet_history[k])
                         if len(localvalue) < 5:
                             localvalue += '0' * (5 - len(localvalue))
                         localtext = self.text
-                        localtext += '#   ' + localvalue + '%   #   ' + time.ctime(k + start_time) + '   #\n'
-                        localtext += '#################################\n'
+                        localtext += '#   ' + localvalue + '%   #   ' + time.ctime(k + start_time)[3:-4] + '   #\n'
+                        localtext += '##########################\n'
                         self.text = localtext
                 else:
                     for k in keyslist[-6:]:
@@ -507,12 +501,12 @@ class GraphLabel(Label):
                         if len(localvalue) < 5:
                             localvalue += '0' * (5 - len(localvalue))
                         localtext = self.text
-                        localtext += '#   ' + localvalue + '%   #   ' + time.ctime(k + start_time) + '   #\n'
-                        localtext += '#################################\n'
+                        localtext += '#   ' + localvalue + '%   #   ' + time.ctime(k + start_time)[3:-4] + '   #\n'
+                        localtext += '##########################\n'
                         self.text = localtext
             elif self.mode == 'temp':
                 keyslist = list(temp_history.keys())
-                self.text = '#################################\n'
+                self.text = '##########################\n'
                 if len(keyslist) < 6:
                     for k in keyslist:
                         localvalue = str(temp_history[k][self.number])
@@ -520,29 +514,28 @@ class GraphLabel(Label):
                             localvalue += '0' * (5 - len(localvalue))
                         localtext = self.text
                         localtext += '#   ' + localvalue + '°C   #   ' + time.ctime(k + start_time) + '   #\n'
-                        localtext += '#################################\n'
+                        localtext += '##########################\n'
                         self.text = localtext
                 else:
-                    print(keyslist[-6:])
                     for k in keyslist[-6:]:
                         localvalue = str(temp_history[k][self.number])
                         if len(localvalue) < 5:
                             localvalue += '0' * (5 - len(localvalue))
                         localtext = self.text
-                        localtext += '#   ' + localvalue + '°C   #   ' + time.ctime(k + start_time) + '   #\n'
-                        localtext += '#################################\n'
+                        localtext += '#   ' + localvalue + '°C   #   ' + time.ctime(k + start_time)[3:-4] + '   #\n'
+                        localtext += '##########################\n'
                         self.text = localtext
             elif self.mode == 'air':
                 keyslist = list(air_wetness_history.keys())
-                self.text = '#################################\n'
+                self.text = '##########################\n'
                 if len(keyslist) < 6:
                     for k in keyslist:
                         localvalue = str(air_wetness_history[k][self.number])
                         if len(localvalue) < 5:
                             localvalue += '0' * (5 - len(localvalue))
                         localtext = self.text
-                        localtext += '#   ' + localvalue + '%   #   ' + time.ctime(k + start_time) + '   #\n'
-                        localtext += '#################################\n'
+                        localtext += '#   ' + localvalue + '%   #   ' + time.ctime(k + start_time)[3:-4] + '   #\n'
+                        localtext += '##########################\n'
                         self.text = localtext
                 else:
                     for k in keyslist[-6:]:
@@ -550,20 +543,20 @@ class GraphLabel(Label):
                         if len(localvalue) < 5:
                             localvalue += '0' * (5 - len(localvalue))
                         localtext = self.text
-                        localtext += '#   ' + localvalue + '%   #   ' + time.ctime(k + start_time) + '   #\n'
-                        localtext += '#################################\n'
+                        localtext += '#   ' + localvalue + '%   #   ' + time.ctime(k + start_time)[3:-4] + '   #\n'
+                        localtext += '##########################\n'
                         self.text = localtext
             elif self.mode == 'soil':
                 keyslist = list(soil_wet_history.keys())
-                self.text = '#################################\n'
+                self.text = '##########################\n'
                 if len(keyslist) < 6:
                     for k in keyslist:
                         localvalue = str(soil_wet_history[k][self.number])
                         if len(localvalue) < 5:
                             localvalue += '0' * (5 - len(localvalue))
                         localtext = self.text
-                        localtext += '#   ' + localvalue + '%   #   ' + time.ctime(k + start_time) + '   #\n'
-                        localtext += '#################################\n'
+                        localtext += '#   ' + localvalue + '%   #   ' + time.ctime(k + start_time)[3:-4] + '   #\n'
+                        localtext += '##########################\n'
                         self.text = localtext
                 else:
                     for k in keyslist[-6:]:
@@ -571,10 +564,9 @@ class GraphLabel(Label):
                         if len(localvalue) < 5:
                             localvalue += '0' * (5 - len(localvalue))
                         localtext = self.text
-                        localtext += '#   ' + localvalue + '%   #   ' + time.ctime(k + start_time) + '   #\n'
-                        localtext += '#################################\n'
+                        localtext += '#   ' + localvalue + '%   #   ' + time.ctime(k + start_time)[3:-4] + '   #\n'
+                        localtext += '##########################\n'
                         self.text = localtext
-
 
 
 class Greenhouse_Automatic_Control_SystemApp(MDApp):
@@ -789,7 +781,7 @@ class Greenhouse_Automatic_Control_SystemApp(MDApp):
         airwetspinner.bind(text=on_air_wet_spinner_set)
         soilwetspinner.bind(text=on_soil_wet_spinner_set)
 
-        current_mode_label.pos_hint = {'x':0, 'y':0.05}
+        current_mode_label.pos_hint = {'x': 0, 'y': 0.05}
         layout2.add_widget(spinner_layout)
 
         floatlayout2 = FloatLayout()
@@ -802,7 +794,7 @@ class Greenhouse_Automatic_Control_SystemApp(MDApp):
         carousel.add_widget(layout3)
 
         def update_all(*args):
-            global temperature, mid_temperature, air_wetness
+            global temperature, mid_air_temp, air_wetness
             global mid_air_wetness, soil_wetness, mid_soil_wetness
             global vents_open, watering, air_wetting, manual_mode
             global max_air_temp, min_air_wetness, min_soil_wetness
